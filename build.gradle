@@ -38,8 +38,33 @@ repositories {
     maven { url "https://plugins.gradle.org/m2/" }
 }
 
+dependencies {
+    implementation "org.opensearch:opensearch:${opensearch_version}"
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.3'
+    testImplementation 'org.mockito:mockito-core:5.14.2'
+}
+
 test {
     include '**/*Tests.class'
+    useJUnitPlatform()
+    outputs.upToDateWhen { false }
+    testLogging {
+        events "failed", "skipped"
+        showExceptions true
+        showCauses true
+        showStackTraces true
+        exceptionFormat "full"
+    }
+    afterSuite { desc, result ->
+        if (!desc.parent) {
+            println "\nTest result: ${result.resultType}"
+            println "Test summary: ${result.testCount} tests, " +
+                    "${result.successfulTestCount} succeeded, " +
+                    "${result.failedTestCount} failed, " +
+                    "${result.skippedTestCount} skipped"
+        }
+    }
 }
 
 task integTest(type: RestIntegTestTask) {
