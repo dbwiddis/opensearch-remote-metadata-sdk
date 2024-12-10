@@ -32,3 +32,10 @@ jobs:
     - name: Build and Run Tests
       run: |
         ./gradlew build
+    - name: Upload Coverage Report
+      if: contains(matrix.os, 'ubuntu') && contains(matrix.java, '21')
+      uses: codecov/codecov-action@v5
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      with:
+        file: ./build/reports/jacoco/test/jacocoTestReport.xml

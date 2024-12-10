@@ -2,19 +2,24 @@ apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'java-library'
 apply plugin: 'eclipse'
+apply plugin: 'jacoco'
 apply plugin: 'com.diffplug.spotless'
 apply from: 'formatter/formatting.gradle'
 
 buildscript {
     ext {
-        opensearchVersion = System.getProperty("opensearch.version", "3.0.0-SNAPSHOT")
-        log4jVersion = '2.24.2'
-        jacksonVersion = '2.18.2'
-        apacheHttpComponentsVersion = '5.3.1'
-        apacheHttpCoreVersion = '5.2.5'
-        awsSdkVersion = '2.25.40'
-        junitVersion = '5.11.3'
-        mockitoVersion = '5.14.2'
+        opensearch_group = "org.opensearch"
+        opensearch_version = System.getProperty("opensearch.version", "3.0.0-SNAPSHOT")
+        is_snapshot = "true" == System.getProperty("build.snapshot", "true")
+        build_version_qualifier = System.getProperty("build.version_qualifier", "")
+
+        log4j_version = '2.24.2'
+        jackson_version = '2.18.2'
+        apache_http_components_version = '5.3.1'
+        apache_http_core_version = '5.2.5'
+        aws_sdk_version = '2.25.40'
+        junit_version = '5.11.3'
+        mockito_version = '5.14.2'
     }
 
     repositories {
@@ -25,7 +30,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "org.opensearch.gradle:build-tools:${opensearchVersion}"
+        classpath "org.opensearch.gradle:build-tools:${opensearch_version}"
         classpath "com.diffplug.spotless:spotless-plugin-gradle:6.25.0"
     }
 }
@@ -43,18 +48,18 @@ java {
 }
 
 dependencies {
-    implementation "org.opensearch:opensearch:${opensearchVersion}"
-    implementation "org.apache.logging.log4j:log4j-api:${log4jVersion}"
-    implementation "org.apache.logging.log4j:log4j-core:${log4jVersion}"
-    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
+    implementation "org.opensearch:opensearch:${opensearch_version}"
+    implementation "org.apache.logging.log4j:log4j-api:${log4j_version}"
+    implementation "org.apache.logging.log4j:log4j-core:${log4j_version}"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jackson_version}"
 
     // For Remote Client: TODO move to new module with SPI
     implementation "org.opensearch.client:opensearch-java:2.10.2"
-    api "org.apache.httpcomponents.client5:httpclient5:${apacheHttpComponentsVersion}"
-    api "org.apache.httpcomponents.core5:httpcore5:${apacheHttpCoreVersion}"
+    api "org.apache.httpcomponents.client5:httpclient5:${apache_http_components_version}"
+    api "org.apache.httpcomponents.core5:httpcore5:${apache_http_core_version}"
 
     // For AWS OpenSearch Service and DDB Client: TODO move to new module with SPI
-    implementation(platform("software.amazon.awssdk:bom:${awsSdkVersion}"))
+    implementation(platform("software.amazon.awssdk:bom:${aws_sdk_version}"))
     implementation("software.amazon.awssdk:apache-client")
     implementation("software.amazon.awssdk:sdk-core")
     implementation("software.amazon.awssdk:aws-core")
@@ -77,9 +82,9 @@ dependencies {
     implementation("software.amazon.awssdk:url-connection-client")
     implementation("software.amazon.awssdk:utils")
 
-    testImplementation "org.opensearch.test:framework:${opensearchVersion}"
-    testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
-    testImplementation "org.mockito:mockito-core:${mockitoVersion}"
+    testImplementation "org.opensearch.test:framework:${opensearch_version}"
+    testImplementation "org.junit.jupiter:junit-jupiter:${junit_version}"
+    testImplementation "org.mockito:mockito-core:${mockito_version}"
 }
 
 test {
@@ -104,6 +109,14 @@ test {
         }
     }
 }
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+    }
+}
+tasks.named("check").configure { dependsOn(jacocoTestReport) }
 
 // updateVersion: Task to auto update version to the next development iteration
 task updateVersion {
