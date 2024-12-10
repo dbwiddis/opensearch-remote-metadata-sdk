@@ -12,6 +12,9 @@ import org.opensearch.core.xcontent.ToXContentObject;
 
 import java.util.Map;
 
+/**
+ * A class abstracting an OpenSearch IndexRequest
+ */
 public class PutDataObjectRequest extends DataObjectRequest {
 
     private final boolean overwriteIfExists;
@@ -22,6 +25,9 @@ public class PutDataObjectRequest extends DataObjectRequest {
      * <p>
      * For data storage implementations other than OpenSearch, an index may be referred to as a table and the data object may be referred to as an item.
      * @param index the index location to put the object
+     * @param id the document id
+     * @param tenantId the tenant id
+     * @param overwriteIfExists whether to overwrite the document if it exists (update)
      * @param dataObject the data object
      */
     public PutDataObjectRequest(String index, String id, String tenantId, boolean overwriteIfExists, ToXContentObject dataObject) {

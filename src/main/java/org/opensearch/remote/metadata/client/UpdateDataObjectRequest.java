@@ -16,6 +16,9 @@ import java.util.Map;
 
 import static org.opensearch.index.seqno.SequenceNumbers.UNASSIGNED_SEQ_NO;
 
+/**
+ * A class abstracting an OpenSearch UpdateRequest
+ */
 public class UpdateDataObjectRequest extends DataObjectRequest {
 
     private final Long ifSeqNo;
@@ -110,6 +113,8 @@ public class UpdateDataObjectRequest extends DataObjectRequest {
          * sequence number. Must be used in combination with {@link #ifPrimaryTerm(long)}
          * <p>
          * Sequence number may be represented by a different document versioning key on non-OpenSearch data stores.
+         * @param seqNo the sequence number
+         * @return the updated builder
          */
         public Builder ifSeqNo(long seqNo) {
             if (seqNo < 0 && seqNo != UNASSIGNED_SEQ_NO) {
@@ -124,6 +129,8 @@ public class UpdateDataObjectRequest extends DataObjectRequest {
          * primary term. Must be used in combination with {@link #ifSeqNo(long)}
          * <p>
          * Primary term may not be relevant on non-OpenSearch data stores.
+         * @param term the primary term
+         * @return the updated builder
          */
         public Builder ifPrimaryTerm(long term) {
             if (term < 0) {

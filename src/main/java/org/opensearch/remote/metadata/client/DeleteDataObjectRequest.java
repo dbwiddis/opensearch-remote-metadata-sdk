@@ -8,6 +8,9 @@
  */
 package org.opensearch.remote.metadata.client;
 
+/**
+ * A class abstracting an OpenSearch DeleteRequest
+ */
 public class DeleteDataObjectRequest extends DataObjectRequest {
 
     /**

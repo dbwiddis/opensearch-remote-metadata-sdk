@@ -10,6 +10,9 @@ package org.opensearch.remote.metadata.client;
 
 import org.opensearch.search.fetch.subphase.FetchSourceContext;
 
+/**
+ * A class abstracting an OpenSearch GetRequest
+ */
 public class GetDataObjectRequest extends DataObjectRequest {
 
     private final FetchSourceContext fetchSourceContext;

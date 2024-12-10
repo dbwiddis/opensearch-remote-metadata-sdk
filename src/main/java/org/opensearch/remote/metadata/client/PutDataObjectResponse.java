@@ -11,6 +11,9 @@ package org.opensearch.remote.metadata.client;
 import org.opensearch.core.rest.RestStatus;
 import org.opensearch.core.xcontent.XContentParser;
 
+/**
+ * A class abstracting an OpenSearch IndexeResponse
+ */
 public class PutDataObjectResponse extends DataObjectResponse {
 
     /**

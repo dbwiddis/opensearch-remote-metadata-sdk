@@ -36,9 +36,20 @@ import jakarta.json.Json;
 import jakarta.json.JsonReader;
 import jakarta.json.stream.JsonGenerator;
 
+/**
+ * Utility methods for transforming JSON to objects
+ */
 public class JsonTransformer {
+
+    private JsonTransformer() {}
+
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+    /**
+     * Convert a JsonNode to a map
+     * @param jsonNode the JsonNode to convert
+     * @return a Map representing the JsonNode
+     */
     public static Map<String, AttributeValue> convertJsonObjectToDDBAttributeMap(JsonNode jsonNode) {
         Map<String, AttributeValue> item = new HashMap<>();
         Iterator<Map.Entry<String, JsonNode>> fields = jsonNode.fields();
@@ -65,6 +76,11 @@ public class JsonTransformer {
         return item;
     }
 
+    /**
+     * Convert a JsonNode to a list
+     * @param jsonArray the JsonNode to convert
+     * @return a List representing the JsonNode
+     */
     public static List<AttributeValue> convertJsonArrayToAttributeValueList(JsonNode jsonArray) {
         List<AttributeValue> attributeValues = new ArrayList<>();
 
@@ -90,6 +106,11 @@ public class JsonTransformer {
         return attributeValues;
     }
 
+    /**
+     * Convert a map to an ObjectNode
+     * @param item a map representing the object
+     * @return an ObjectNode
+     */
     public static ObjectNode convertDDBAttributeValueMapToObjectNode(Map<String, AttributeValue> item) {
         ObjectNode objectNode = OBJECT_MAPPER.createObjectNode();
 
@@ -122,6 +143,11 @@ public class JsonTransformer {
 
     }
 
+    /**
+     * Convert a list to an ArrayNode
+     * @param attributeValueList a list of values
+     * @return An ArrayNode
+     */
     public static ArrayNode convertAttributeValueListToArrayNode(final List<AttributeValue> attributeValueList) {
         ArrayNode arrayNode = OBJECT_MAPPER.createArrayNode();
         attributeValueList.forEach(attribute -> {
@@ -152,6 +178,9 @@ public class JsonTransformer {
 
     }
 
+    /**
+     * A JsonPSerializer serializing XContent
+     */
     public static class XContentObjectJsonpSerializer implements JsonpSerializer<Object> {
         @Override
         public void serialize(Object obj, JsonGenerator generator, JsonpMapper mapper) {

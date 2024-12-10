@@ -20,7 +20,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Utility methods for client implementations
+ */
 public class SdkClientUtils {
+
+    private SdkClientUtils() {}
 
     /**
      * Unwraps the cause of a {@link CompletionException}. If the cause is an {@link Exception}, rethrows the exception.

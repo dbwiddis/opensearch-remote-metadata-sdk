@@ -18,6 +18,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * A class abstracting an OpenSearch BulkRequest
+ */
 public class BulkDataObjectRequest {
 
     private final List<DataObjectRequest> requests = new ArrayList<>();
@@ -78,6 +81,8 @@ public class BulkDataObjectRequest {
     /**
      * Should this request trigger a refresh ({@linkplain RefreshPolicy#IMMEDIATE}), wait for a refresh (
      * {@linkplain RefreshPolicy#WAIT_UNTIL}), or proceed ignore refreshes entirely ({@linkplain RefreshPolicy#NONE}, the default).
+     * @param refreshPolicy the refresh policy
+     * @return the updated request
      */
     public BulkDataObjectRequest setRefreshPolicy(RefreshPolicy refreshPolicy) {
         this.refreshPolicy = refreshPolicy;
@@ -87,6 +92,7 @@ public class BulkDataObjectRequest {
     /**
      * Should this request trigger a refresh ({@linkplain RefreshPolicy#IMMEDIATE}), wait for a refresh (
      * {@linkplain RefreshPolicy#WAIT_UNTIL}), or proceed ignore refreshes entirely ({@linkplain RefreshPolicy#NONE}, the default).
+     * @return the refresh policy
      */
     public RefreshPolicy getRefreshPolicy() {
         return refreshPolicy;

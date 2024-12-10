@@ -14,6 +14,9 @@ import org.opensearch.core.xcontent.XContentParser;
 import java.util.Collections;
 import java.util.Map;
 
+/**
+ * A class abstracting an OpenSearch GetResponse
+ */
 public class GetDataObjectResponse extends DataObjectResponse {
     private final Map<String, Object> source;
 

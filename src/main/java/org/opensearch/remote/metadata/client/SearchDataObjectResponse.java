@@ -10,6 +10,9 @@ package org.opensearch.remote.metadata.client;
 
 import org.opensearch.core.xcontent.XContentParser;
 
+/**
+ * A class abstracting an OpenSearch SearchResponse
+ */
 public class SearchDataObjectResponse {
     private final XContentParser parser;
 

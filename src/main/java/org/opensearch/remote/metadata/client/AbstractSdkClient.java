@@ -15,8 +15,18 @@ import java.util.concurrent.Executor;
 
 import static org.opensearch.common.util.concurrent.ThreadContextAccess.doPrivileged;
 
+/**
+ * Superclass abstracting privileged action execution
+ */
 public abstract class AbstractSdkClient implements SdkClientDelegate {
 
+    /**
+     * Execute this priveleged action asynchronously
+     * @param <T> The return type of the completable future to be returned
+     * @param action the action to execute
+     * @param executor the executor for the action
+     * @return A {@link CompletionStage} encapsulating the completable future for the action
+     */
     protected <T> CompletionStage<T> executePrivilegedAsync(PrivilegedAction<T> action, Executor executor) {
         return CompletableFuture.supplyAsync(() -> doPrivileged(action), executor);
     }

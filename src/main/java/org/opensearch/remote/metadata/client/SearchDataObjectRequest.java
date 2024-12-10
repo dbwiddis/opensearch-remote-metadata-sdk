@@ -10,6 +10,9 @@ package org.opensearch.remote.metadata.client;
 
 import org.opensearch.search.builder.SearchSourceBuilder;
 
+/**
+ * A class abstracting an OpenSearch SearchRequest
+ */
 public class SearchDataObjectRequest {
 
     private final String[] indices;

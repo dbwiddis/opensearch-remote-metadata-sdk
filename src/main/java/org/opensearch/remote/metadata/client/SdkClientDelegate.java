@@ -11,6 +11,9 @@ package org.opensearch.remote.metadata.client;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 
+/**
+ * An interface required by a client implementation, which is wrapped in the SdkClient
+ */
 public interface SdkClientDelegate {
 
     /**

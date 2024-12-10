@@ -8,6 +8,9 @@
  */
 package org.opensearch.remote.metadata.client;
 
+/**
+ * A superclass for common fields in Data Object Request classes
+ */
 public abstract class DataObjectRequest {
 
     private String index;
@@ -76,6 +79,8 @@ public abstract class DataObjectRequest {
 
     /**
      * Superclass for common fields in subclass builders
+     *
+     * @param <T> The type of the subclass builder
      */
     public static class Builder<T extends Builder<T>> {
         protected String index = null;
@@ -119,6 +124,7 @@ public abstract class DataObjectRequest {
 
         /**
          * Returns this builder as the parameterized type.
+         * @return the builder cast to its correct type
          */
         @SuppressWarnings("unchecked")
         protected T self() {

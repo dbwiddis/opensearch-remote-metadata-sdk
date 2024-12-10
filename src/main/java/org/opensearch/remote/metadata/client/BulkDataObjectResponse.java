@@ -12,6 +12,9 @@ import org.opensearch.core.xcontent.XContentParser;
 
 import static org.opensearch.action.bulk.BulkResponse.NO_INGEST_TOOK;
 
+/**
+ * A class abstracting an OpenSearch BulkResponse
+ */
 public class BulkDataObjectResponse {
 
     private final DataObjectResponse[] responses;
@@ -20,10 +23,25 @@ public class BulkDataObjectResponse {
     private final boolean failures;
     private final XContentParser parser;
 
+    /**
+     * Instantiate this response
+     * @param responses an array of responses
+     * @param tookInMillis the time taken to process, in milliseconds
+     * @param failures whether there are any failures in the responses
+     * @param parser a parser that can be used to recreate the object
+     */
     public BulkDataObjectResponse(DataObjectResponse[] responses, long tookInMillis, boolean failures, XContentParser parser) {
         this(responses, tookInMillis, NO_INGEST_TOOK, failures, parser);
     }
 
+    /**
+     * Instantiate this response
+     * @param responses an array of responses
+     * @param tookInMillis the time taken to process, in milliseconds
+     * @param ingestTookInMillis the time taken to process ingest, in milliseconds
+     * @param failures whether there are any failures in the responses
+     * @param parser a parser that can be used to recreate the object
+     */
     public BulkDataObjectResponse(
         DataObjectResponse[] responses,
         long tookInMillis,

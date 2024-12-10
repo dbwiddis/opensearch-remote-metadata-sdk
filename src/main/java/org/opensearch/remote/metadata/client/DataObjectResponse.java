@@ -11,6 +11,9 @@ package org.opensearch.remote.metadata.client;
 import org.opensearch.core.rest.RestStatus;
 import org.opensearch.core.xcontent.XContentParser;
 
+/**
+ * A superclass for common fields in Data Object Response classes
+ */
 public abstract class DataObjectResponse {
     private final String index;
     private final String id;
@@ -89,6 +92,8 @@ public abstract class DataObjectResponse {
 
     /**
      * Superclass for common fields in subclass builders
+     *
+     * @param <T> The type of the subclass builder
      */
     public static class Builder<T extends Builder<T>> {
         protected String index = null;
@@ -165,6 +170,7 @@ public abstract class DataObjectResponse {
 
         /**
          * Returns this builder as the parameterized type.
+         * @return the builder cast to its correct type
          */
         @SuppressWarnings("unchecked")
         protected T self() {

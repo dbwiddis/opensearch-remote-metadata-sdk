@@ -20,11 +20,19 @@ import java.util.concurrent.ForkJoinPool;
 
 import static org.opensearch.remote.metadata.common.SdkClientUtils.unwrapAndConvertToException;
 
+/**
+ * A concrete client object which delegates calls to a {@link SdkClientDelegate} implementation after validating the tenant id.
+ */
 public class SdkClient {
 
     private final SdkClientDelegate delegate;
     private final Boolean isMultiTenancyEnabled;
 
+    /**
+     * Instantiate this client
+     * @param delegate The client implementation to delegate calls to
+     * @param multiTenancy whether multiTenancy is enabled
+     */
     public SdkClient(SdkClientDelegate delegate, Boolean multiTenancy) {
         this.delegate = delegate;
         this.isMultiTenancyEnabled = multiTenancy;

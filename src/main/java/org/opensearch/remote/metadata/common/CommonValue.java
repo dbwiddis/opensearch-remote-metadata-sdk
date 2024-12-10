@@ -10,6 +10,9 @@ package org.opensearch.remote.metadata.common;
 
 import java.util.Set;
 
+/**
+ * Strings used by classes depending on this library
+ */
 public class CommonValue {
     /** The key for tenant id field name. */
     public static final String TENANT_ID_FIELD_KEY = "tenant_id";
