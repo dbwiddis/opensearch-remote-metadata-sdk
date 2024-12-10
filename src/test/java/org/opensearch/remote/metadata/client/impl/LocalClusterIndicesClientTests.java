@@ -102,6 +102,7 @@ public class LocalClusterIndicesClientTests {
     private static final String TEST_ID = "123";
     private static final String TEST_INDEX = "test_index";
     private static final String TEST_TENANT_ID = "xyz";
+    private static final String TENANT_ID_FIELD = "tenant_id";
 
     private static TestThreadPool testThreadPool = new TestThreadPool(
         LocalClusterIndicesClientTests.class.getName(),
@@ -127,7 +128,7 @@ public class LocalClusterIndicesClientTests {
     public void setup() {
         MockitoAnnotations.openMocks(this);
 
-        sdkClient = new SdkClient(new LocalClusterIndicesClient(mockedClient, xContentRegistry), true);
+        sdkClient = new SdkClient(new LocalClusterIndicesClient(mockedClient, xContentRegistry, TENANT_ID_FIELD), true);
 
         testDataObject = new TestDataObject("foo");
     }
@@ -728,7 +729,7 @@ public class LocalClusterIndicesClientTests {
         when(mockedClient.search(any(SearchRequest.class))).thenReturn(future);
         when(future.actionGet()).thenReturn(searchResponse);
 
-        SdkClient sdkClientNoTenant = new SdkClient(new LocalClusterIndicesClient(mockedClient, xContentRegistry), false);
+        SdkClient sdkClientNoTenant = new SdkClient(new LocalClusterIndicesClient(mockedClient, xContentRegistry, TEST_TENANT_ID), false);
         SearchDataObjectResponse response = sdkClientNoTenant.searchDataObjectAsync(
             searchRequest,
             testThreadPool.executor(GENERAL_THREAD_POOL)
@@ -821,7 +822,7 @@ public class LocalClusterIndicesClientTests {
     @Test
     public void testSearchDataObject_NullTenantNoMultitenancy() throws IOException {
         // Tests no status exception if multitenancy not enabled
-        SdkClient sdkClientNoTenant = new SdkClient(new LocalClusterIndicesClient(mockedClient, xContentRegistry), false);
+        SdkClient sdkClientNoTenant = new SdkClient(new LocalClusterIndicesClient(mockedClient, xContentRegistry, TEST_TENANT_ID), false);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         SearchDataObjectRequest searchRequest = SearchDataObjectRequest.builder()

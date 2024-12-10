@@ -64,7 +64,6 @@ import org.opensearch.remote.metadata.client.SearchDataObjectRequest;
 import org.opensearch.remote.metadata.client.SearchDataObjectResponse;
 import org.opensearch.remote.metadata.client.UpdateDataObjectRequest;
 import org.opensearch.remote.metadata.client.UpdateDataObjectResponse;
-import org.opensearch.remote.metadata.common.CommonValue;
 import org.opensearch.remote.metadata.common.JsonTransformer;
 import org.opensearch.remote.metadata.common.SdkClientUtils;
 
@@ -93,17 +92,20 @@ public class RemoteClusterIndicesClient extends AbstractSdkClient {
     @SuppressWarnings("unchecked")
     private static final Class<Map<String, Object>> MAP_DOCTYPE = (Class<Map<String, Object>>) (Class<?>) Map.class;
 
-    private OpenSearchClient openSearchClient;
-    private JsonpMapper mapper;
+    private final OpenSearchClient openSearchClient;
+    private final JsonpMapper mapper;
+    private final String tenantIdField;
 
     /**
      * Instantiate this object with an OpenSearch Java client.
      *
      * @param openSearchClient The client to wrap
+     * @param tenantIdField the field name for the tenant id
      */
-    public RemoteClusterIndicesClient(OpenSearchClient openSearchClient) {
+    public RemoteClusterIndicesClient(OpenSearchClient openSearchClient, String tenantIdField) {
         this.openSearchClient = openSearchClient;
         this.mapper = openSearchClient._transport().jsonpMapper();
+        this.tenantIdField = tenantIdField;
     }
 
     @Override
@@ -396,7 +398,7 @@ public class RemoteClusterIndicesClient extends AbstractSdkClient {
                     if (request.tenantId() == null) {
                         throw new OpenSearchStatusException("Tenant ID is required when multitenancy is enabled.", RestStatus.BAD_REQUEST);
                     }
-                    TermQuery tenantIdFilterQuery = new TermQuery.Builder().field(CommonValue.TENANT_ID)
+                    TermQuery tenantIdFilterQuery = new TermQuery.Builder().field(this.tenantIdField)
                         .value(FieldValue.of(request.tenantId()))
                         .build();
                     Query existingQuery = searchRequest.query();

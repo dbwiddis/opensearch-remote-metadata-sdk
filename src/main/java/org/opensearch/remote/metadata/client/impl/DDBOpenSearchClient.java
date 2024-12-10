@@ -83,7 +83,6 @@ import java.util.stream.Collectors;
 import static org.opensearch.common.xcontent.json.JsonXContent.jsonXContent;
 import static org.opensearch.index.seqno.SequenceNumbers.UNASSIGNED_PRIMARY_TERM;
 import static org.opensearch.index.seqno.SequenceNumbers.UNASSIGNED_SEQ_NO;
-import static org.opensearch.remote.metadata.common.CommonValue.TENANT_ID;
 
 /**
  * DDB implementation of {@link SdkClient}. DDB table name will be mapped to index name.
@@ -105,8 +104,9 @@ public class DDBOpenSearchClient extends AbstractSdkClient {
     // TENANT_ID hash key requires non-null value
     private static final String DEFAULT_TENANT = "DEFAULT_TENANT";
 
-    private DynamoDbClient dynamoDbClient;
-    private RemoteClusterIndicesClient remoteClusterIndicesClient;
+    private final DynamoDbClient dynamoDbClient;
+    private final RemoteClusterIndicesClient remoteClusterIndicesClient;
+    private final String tenantIdField;
 
     /**
      * Default constructor
@@ -114,10 +114,12 @@ public class DDBOpenSearchClient extends AbstractSdkClient {
      * @param dynamoDbClient AWS DDB client to perform CRUD operations on a DDB table.
      * @param remoteClusterIndicesClient Remote opensearch client to perform search operations. Documents written to DDB
      *                                  needs to be synced offline with remote opensearch.
+     * @param tenantIdField the field name for the tenant id
      */
-    public DDBOpenSearchClient(DynamoDbClient dynamoDbClient, RemoteClusterIndicesClient remoteClusterIndicesClient) {
+    public DDBOpenSearchClient(DynamoDbClient dynamoDbClient, RemoteClusterIndicesClient remoteClusterIndicesClient, String tenantIdField) {
         this.dynamoDbClient = dynamoDbClient;
         this.remoteClusterIndicesClient = remoteClusterIndicesClient;
+        this.tenantIdField = tenantIdField;
     }
 
     /**
@@ -145,7 +147,7 @@ public class DDBOpenSearchClient extends AbstractSdkClient {
                 JsonNode jsonNode = OBJECT_MAPPER.readTree(source);
                 Map<String, AttributeValue> sourceMap = JsonTransformer.convertJsonObjectToDDBAttributeMap(jsonNode);
                 if (request.tenantId() != null) {
-                    sourceMap.put(TENANT_ID, AttributeValue.builder().s(tenantId).build());
+                    sourceMap.put(this.tenantIdField, AttributeValue.builder().s(tenantId).build());
                 }
                 Map<String, AttributeValue> item = new HashMap<>();
                 item.put(HASH_KEY, AttributeValue.builder().s(tenantId).build());
@@ -276,7 +278,7 @@ public class DDBOpenSearchClient extends AbstractSdkClient {
 
     private Long updateItemWithRetryOnConflict(String tenantId, JsonNode jsonNode, UpdateDataObjectRequest request) {
         Map<String, AttributeValue> updateItem = JsonTransformer.convertJsonObjectToDDBAttributeMap(jsonNode);
-        updateItem.remove(TENANT_ID);
+        updateItem.remove(this.tenantIdField);
         updateItem.remove(RANGE_KEY);
         Map<String, AttributeValue> updateKey = new HashMap<>();
         updateKey.put(HASH_KEY, AttributeValue.builder().s(tenantId).build());

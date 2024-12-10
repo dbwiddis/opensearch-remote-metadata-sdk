@@ -19,6 +19,7 @@ import software.amazon.awssdk.auth.credentials.AwsCredentialsProviderChain;
 import software.amazon.awssdk.auth.credentials.ContainerCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.InstanceProfileCredentialsProvider;
+import software.amazon.awssdk.http.SdkHttpClient;
 import software.amazon.awssdk.http.apache.ApacheHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
@@ -56,7 +57,13 @@ import java.util.Map;
 import static org.opensearch.common.util.concurrent.ThreadContextAccess.doPrivileged;
 import static org.opensearch.remote.metadata.common.CommonValue.AWS_DYNAMO_DB;
 import static org.opensearch.remote.metadata.common.CommonValue.AWS_OPENSEARCH_SERVICE;
+import static org.opensearch.remote.metadata.common.CommonValue.REMOTE_METADATA_ENDPOINT_KEY;
+import static org.opensearch.remote.metadata.common.CommonValue.REMOTE_METADATA_REGION_KEY;
+import static org.opensearch.remote.metadata.common.CommonValue.REMOTE_METADATA_SERVICE_NAME_KEY;
+import static org.opensearch.remote.metadata.common.CommonValue.REMOTE_METADATA_TYPE_KEY;
 import static org.opensearch.remote.metadata.common.CommonValue.REMOTE_OPENSEARCH;
+import static org.opensearch.remote.metadata.common.CommonValue.TENANT_AWARE_KEY;
+import static org.opensearch.remote.metadata.common.CommonValue.TENANT_ID_FIELD_KEY;
 import static org.opensearch.remote.metadata.common.CommonValue.VALID_AWS_OPENSEARCH_SERVICE_NAMES;
 
 /**
@@ -69,15 +76,17 @@ public class SdkClientFactory {
      * Create a new SdkClient with implementation determined by the value of the Remote Metadata Type setting
      * @param client The OpenSearch node client used as the default implementation
      * @param xContentRegistry The OpenSearch XContentRegistry
-     * @param settings OpenSearch cluster settings.
+     * @param metadataSettings A map defining the remote metadata type and configuration
      * @return An instance of SdkClient which delegates to an implementation based on Remote Metadata Type
      */
-    public static SdkClient createSdkClient(Client client, NamedXContentRegistry xContentRegistry, Map<String, String> settings) {
-        String remoteMetadataType = null; // REMOTE_METADATA_TYPE.get(settings);
-        String remoteMetadataEndpoint = null; // REMOTE_METADATA_ENDPOINT.get(settings);
-        String region = null; // REMOTE_METADATA_REGION.get(settings);
-        String serviceName = null; // REMOTE_METADATA_SERVICE_NAME.get(settings);
-        Boolean multiTenancy = null; // ML_COMMONS_MULTI_TENANCY_ENABLED.get(settings);
+    public static SdkClient createSdkClient(Client client, NamedXContentRegistry xContentRegistry, Map<String, String> metadataSettings) {
+        String tenantIdField = metadataSettings.get(TENANT_ID_FIELD_KEY);
+        Boolean multiTenancy = Boolean.parseBoolean(metadataSettings.get(TENANT_AWARE_KEY));
+
+        String remoteMetadataType = metadataSettings.get(REMOTE_METADATA_TYPE_KEY);
+        String remoteMetadataEndpoint = metadataSettings.get(REMOTE_METADATA_ENDPOINT_KEY);
+        String region = metadataSettings.get(REMOTE_METADATA_REGION_KEY);
+        String serviceName = metadataSettings.get(REMOTE_METADATA_SERVICE_NAME_KEY);
 
         switch (remoteMetadataType) {
             case REMOTE_OPENSEARCH:
@@ -85,12 +94,18 @@ public class SdkClientFactory {
                     throw new OpenSearchException("Remote Opensearch client requires a metadata endpoint.");
                 }
                 log.info("Using remote opensearch cluster as metadata store");
-                return new SdkClient(new RemoteClusterIndicesClient(createOpenSearchClient(remoteMetadataEndpoint)), multiTenancy);
+                return new SdkClient(
+                    new RemoteClusterIndicesClient(createOpenSearchClient(remoteMetadataEndpoint), tenantIdField),
+                    multiTenancy
+                );
             case AWS_OPENSEARCH_SERVICE:
                 validateAwsParams(remoteMetadataType, remoteMetadataEndpoint, region, serviceName);
                 log.info("Using remote AWS Opensearch Service cluster as metadata store");
                 return new SdkClient(
-                    new RemoteClusterIndicesClient(createAwsOpenSearchServiceClient(remoteMetadataEndpoint, region, serviceName)),
+                    new RemoteClusterIndicesClient(
+                        createAwsOpenSearchServiceClient(remoteMetadataEndpoint, region, serviceName),
+                        tenantIdField
+                    ),
                     multiTenancy
                 );
             case AWS_DYNAMO_DB:
@@ -99,13 +114,17 @@ public class SdkClientFactory {
                 return new SdkClient(
                     new DDBOpenSearchClient(
                         createDynamoDbClient(region),
-                        new RemoteClusterIndicesClient(createAwsOpenSearchServiceClient(remoteMetadataEndpoint, region, serviceName))
+                        new RemoteClusterIndicesClient(
+                            createAwsOpenSearchServiceClient(remoteMetadataEndpoint, region, serviceName),
+                            tenantIdField
+                        ),
+                        tenantIdField
                     ),
                     multiTenancy
                 );
             default:
                 log.info("Using local opensearch cluster as metadata store");
-                return new SdkClient(new LocalClusterIndicesClient(client, xContentRegistry), multiTenancy);
+                return new SdkClient(new LocalClusterIndicesClient(client, xContentRegistry, tenantIdField), multiTenancy);
         }
     }
 
@@ -175,10 +194,11 @@ public class SdkClientFactory {
 
     private static OpenSearchClient createAwsOpenSearchServiceClient(String remoteMetadataEndpoint, String region, String signingService) {
         // https://github.com/opensearch-project/opensearch-java/blob/main/guides/auth.md
+        final SdkHttpClient httpClient = ApacheHttpClient.builder().build();
         return new OpenSearchClient(
             doPrivileged(
                 () -> new AwsSdk2Transport(
-                    ApacheHttpClient.builder().build(),
+                    httpClient,
                     remoteMetadataEndpoint.replaceAll("^https?://", ""), // OpenSearch endpoint, without https://
                     signingService, // signing service name, use "es" for OpenSearch, "aoss" for OpenSearch Serverless
                     Region.of(region), // signing service region

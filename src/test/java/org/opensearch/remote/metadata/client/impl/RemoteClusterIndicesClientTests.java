@@ -85,6 +85,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import static org.opensearch.core.xcontent.XContentParserUtils.ensureExpectedToken;
+import static org.opensearch.remote.metadata.common.CommonValue.TENANT_ID_FIELD_KEY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -99,6 +100,7 @@ public class RemoteClusterIndicesClientTests {
 
     private static final String TEST_ID = "123";
     private static final String TEST_INDEX = "test_index";
+    private static final String TENANT_ID_FIELD = "tenant_id";
     private static final String TEST_TENANT_ID = "xyz";
     private static final String TEST_THREAD_POOL = "test_pool";
 
@@ -133,7 +135,7 @@ public class RemoteClusterIndicesClientTests {
                     .setSerializationInclusion(JsonInclude.Include.NON_NULL)
             )
         );
-        sdkClient = SdkClientFactory.wrapSdkClientDelegate(new RemoteClusterIndicesClient(mockedOpenSearchClient), true);
+        sdkClient = SdkClientFactory.wrapSdkClientDelegate(new RemoteClusterIndicesClient(mockedOpenSearchClient, TENANT_ID_FIELD), true);
         testDataObject = new TestDataObject("foo");
     }
 
@@ -760,7 +762,7 @@ public class RemoteClusterIndicesClientTests {
         assertEquals(1, query.bool().must().size());
         assertEquals(1, query.bool().filter().size());
         assertTrue(query.bool().filter().get(0).isTerm());
-        assertEquals("tenant_id", query.bool().filter().get(0).term().field());
+        assertEquals(TENANT_ID_FIELD_KEY, query.bool().filter().get(0).term().field());
         assertEquals(TEST_TENANT_ID, query.bool().filter().get(0).term().value().stringValue());
 
         org.opensearch.action.search.SearchResponse searchActionResponse = org.opensearch.action.search.SearchResponse.fromXContent(
@@ -797,7 +799,10 @@ public class RemoteClusterIndicesClientTests {
     @Test
     public void testSearchDataObject_NullTenantNoMultitenancy() throws IOException {
         // Tests no status exception if multitenancy not enabled
-        SdkClient sdkClientNoTenant = SdkClientFactory.wrapSdkClientDelegate(new RemoteClusterIndicesClient(mockedOpenSearchClient), false);
+        SdkClient sdkClientNoTenant = SdkClientFactory.wrapSdkClientDelegate(
+            new RemoteClusterIndicesClient(mockedOpenSearchClient, null),
+            false
+        );
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         SearchDataObjectRequest searchRequest = SearchDataObjectRequest.builder()

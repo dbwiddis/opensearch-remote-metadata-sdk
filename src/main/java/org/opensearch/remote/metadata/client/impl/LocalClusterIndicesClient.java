@@ -56,7 +56,6 @@ import org.opensearch.remote.metadata.client.SearchDataObjectRequest;
 import org.opensearch.remote.metadata.client.SearchDataObjectResponse;
 import org.opensearch.remote.metadata.client.UpdateDataObjectRequest;
 import org.opensearch.remote.metadata.client.UpdateDataObjectResponse;
-import org.opensearch.remote.metadata.common.CommonValue;
 import org.opensearch.search.builder.SearchSourceBuilder;
 
 import java.io.IOException;
@@ -78,17 +77,20 @@ public class LocalClusterIndicesClient extends AbstractSdkClient {
 
     private final Client client;
     private final NamedXContentRegistry xContentRegistry;
+    private final String tenantIdField;
 
     /**
      * Instantiate this object with an OpenSearch client.
      *
-     * @param client           The client to wrap
+     * @param client The client to wrap
      * @param xContentRegistry the registry of XContent objects
+     * @param tenantIdField the field name for the tenant id
      */
     @Inject
-    public LocalClusterIndicesClient(Client client, NamedXContentRegistry xContentRegistry) {
+    public LocalClusterIndicesClient(Client client, NamedXContentRegistry xContentRegistry, String tenantIdField) {
         this.client = client;
         this.xContentRegistry = xContentRegistry;
+        this.tenantIdField = tenantIdField;
     }
 
     @Override
@@ -317,7 +319,7 @@ public class LocalClusterIndicesClient extends AbstractSdkClient {
                 );
             }
             QueryBuilder existingQuery = searchSource.query();
-            TermQueryBuilder tenantIdTermQuery = QueryBuilders.termQuery(CommonValue.TENANT_ID, request.tenantId());
+            TermQueryBuilder tenantIdTermQuery = QueryBuilders.termQuery(this.tenantIdField, request.tenantId());
             if (existingQuery == null) {
                 searchSource.query(tenantIdTermQuery);
             } else {

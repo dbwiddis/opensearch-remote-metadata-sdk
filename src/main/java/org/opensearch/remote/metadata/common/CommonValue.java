@@ -11,8 +11,10 @@ package org.opensearch.remote.metadata.common;
 import java.util.Set;
 
 public class CommonValue {
-    public static final String TENANT_ID = "tenant_id";
-
+    /** The key for tenant id field name. */
+    public static final String TENANT_ID_FIELD_KEY = "tenant_id";
+    /** The key for tenant awareness. */
+    public static final String TENANT_AWARE_KEY = "tenant_aware";
     /** The key for remote metadata type. */
     public static final String REMOTE_METADATA_TYPE_KEY = "remote_metadata_type";
     /** The key for remote metadata endpoint, applicable to remote clusters or Zero-ETL DynamoDB sinks */

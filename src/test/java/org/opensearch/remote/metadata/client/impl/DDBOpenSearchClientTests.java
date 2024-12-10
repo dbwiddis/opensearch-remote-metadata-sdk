@@ -96,6 +96,7 @@ public class DDBOpenSearchClientTests {
     private static final String SOURCE = "_source";
 
     private static final String TEST_ID = "123";
+    private static final String TENANT_ID_FIELD = "tenant_id";
     private static final String TENANT_ID = "TEST_TENANT_ID";
     private static final String TEST_INDEX = "test_index";
     private static final String TEST_INDEX_2 = "test_index_2";
@@ -139,7 +140,10 @@ public class DDBOpenSearchClientTests {
     public void setup() {
         MockitoAnnotations.openMocks(this);
 
-        sdkClient = SdkClientFactory.wrapSdkClientDelegate(new DDBOpenSearchClient(dynamoDbClient, remoteClusterIndicesClient), true);
+        sdkClient = SdkClientFactory.wrapSdkClientDelegate(
+            new DDBOpenSearchClient(dynamoDbClient, remoteClusterIndicesClient, TENANT_ID_FIELD),
+            true
+        );
         testDataObject = new TestDataObject("foo");
     }
 
@@ -242,7 +246,7 @@ public class DDBOpenSearchClientTests {
         assertEquals("hello", putItemRequest.item().get(SOURCE).m().get("testList").l().get(1).s());
         assertEquals(null, putItemRequest.item().get(SOURCE).m().get("testList").l().get(2).s());
         assertEquals("foo", putItemRequest.item().get(SOURCE).m().get("testObject").m().get("data").s());
-        assertEquals(TENANT_ID, putItemRequest.item().get(SOURCE).m().get(CommonValue.TENANT_ID).s());
+        assertEquals(TENANT_ID, putItemRequest.item().get(SOURCE).m().get(CommonValue.TENANT_ID_FIELD_KEY).s());
     }
 
     @Test
