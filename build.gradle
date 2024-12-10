@@ -2,6 +2,7 @@ import org.opensearch.gradle.test.RestIntegTestTask
 
 apply plugin: 'java'
 apply plugin: 'idea'
+apply plugin: 'java-library'
 apply plugin: 'eclipse'
 apply plugin: 'com.diffplug.spotless'
 apply from: 'formatter/formatting.gradle'
@@ -42,6 +43,37 @@ dependencies {
     implementation "org.opensearch:opensearch:${opensearch_version}"
     implementation 'org.apache.logging.log4j:log4j-api:2.24.2'
     implementation 'org.apache.logging.log4j:log4j-core:2.24.2'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.2'
+
+    // For Remote Client: TODO move to new module with SPI
+    implementation "org.opensearch.client:opensearch-java:2.10.2"
+    api "org.apache.httpcomponents.client5:httpclient5:5.3.1"
+    api "org.apache.httpcomponents.core5:httpcore5:5.2.5"
+
+    // For AWS OpenSearch Service dependency (may need some DDB below): TODO move to new module with SPI
+    implementation("software.amazon.awssdk:apache-client:2.25.40")
+
+    // For DDB Client: TODO move to new module with SPI
+    implementation("software.amazon.awssdk:sdk-core:2.25.40")
+    implementation("software.amazon.awssdk:aws-core:2.25.40")
+    implementation "software.amazon.awssdk:aws-json-protocol:2.25.40"
+    implementation("software.amazon.awssdk:auth:2.25.40")
+    implementation("software.amazon.awssdk:checksums:2.25.40")
+    implementation("software.amazon.awssdk:checksums-spi:2.25.40")
+    implementation("software.amazon.awssdk:dynamodb:2.25.40")
+    implementation("software.amazon.awssdk:endpoints-spi:2.25.40")
+    implementation("software.amazon.awssdk:http-auth-aws:2.25.40")
+    implementation("software.amazon.awssdk:http-auth-spi:2.25.40")
+    implementation("software.amazon.awssdk:http-client-spi:2.25.40")
+    implementation("software.amazon.awssdk:identity-spi:2.25.40")
+    implementation "software.amazon.awssdk:json-utils:2.25.40"
+    implementation "software.amazon.awssdk:metrics-spi:2.25.40"
+    implementation("software.amazon.awssdk:profiles:2.25.40")
+    implementation "software.amazon.awssdk:protocol-core:2.25.40"
+    implementation("software.amazon.awssdk:regions:2.25.40")
+    implementation "software.amazon.awssdk:third-party-jackson-core:2.25.40"
+    implementation("software.amazon.awssdk:url-connection-client:2.25.40")
+    implementation("software.amazon.awssdk:utils:2.25.40")
 
     testImplementation "org.opensearch.test:framework:${opensearch_version}"
     testImplementation 'org.junit.jupiter:junit-jupiter:5.11.3'
@@ -50,6 +82,7 @@ dependencies {
 
 test {
     include '**/*Tests.class'
+    systemProperty 'tests.security.manager', 'false'
     useJUnitPlatform()
     outputs.upToDateWhen { false }
     testLogging {
